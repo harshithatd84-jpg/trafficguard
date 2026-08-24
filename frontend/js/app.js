@@ -3,7 +3,7 @@
    Full featured: Predict, Dashboard, Map, Models,
    History, Upload, Export, Auth, i18n, Theme
 ═══════════════════════════════════════════════ */
-const API = 'http://127.0.0.1:5000';
+const API = '';
 let charts = {};
 let lastResult = null;
 let historyData = [];
