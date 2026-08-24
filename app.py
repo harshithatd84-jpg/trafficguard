@@ -5,12 +5,12 @@ Run: python app.py
 import os, json, pickle, warnings, csv, io, datetime, hashlib, secrets
 import numpy as np
 import pandas as pd
-from flask import Flask, request, jsonify, make_response, send_file
+from flask import Flask, request, jsonify, make_response, send_file, send_from_directory
 from werkzeug.utils import secure_filename
 
 warnings.filterwarnings('ignore')
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='frontend', static_url_path='')
 
 # ─── CORS — fixed, no credentials conflict ────────────────────────────────────
 @app.after_request
@@ -411,7 +411,12 @@ def get_options():
 
 @app.route('/')
 def index():
-    return jsonify({"message":"TrafficGuard AI API","status":"running","version":"2.0"})
+    return send_from_directory('frontend', 'index.html')
+
+
+@app.route('/<path:filename>')
+def frontend_files(filename):
+    return send_from_directory('frontend', filename)
 
 if __name__ == '__main__':
     if not os.path.exists(f'{MODELS_DIR}/best_model.pkl'):
