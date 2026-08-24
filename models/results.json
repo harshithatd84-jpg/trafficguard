@@ -1,0 +1,261 @@
+{
+  "Random Forest": {
+    "accuracy": 76.94,
+    "precision": 79.39,
+    "recall": 76.94,
+    "f1_score": 74.86,
+    "confusion_matrix": [
+      [
+        497,
+        0,
+        159
+      ],
+      [
+        0,
+        16,
+        115
+      ],
+      [
+        95,
+        0,
+        718
+      ]
+    ],
+    "cv_mean": 76.77,
+    "cv_std": 1.84
+  },
+  "XGBoost": {
+    "accuracy": 79.88,
+    "precision": 80.17,
+    "recall": 79.88,
+    "f1_score": 79.35,
+    "confusion_matrix": [
+      [
+        518,
+        0,
+        138
+      ],
+      [
+        0,
+        54,
+        77
+      ],
+      [
+        92,
+        15,
+        706
+      ]
+    ],
+    "cv_mean": 78.7,
+    "cv_std": 1.01
+  },
+  "Logistic Regression": {
+    "accuracy": 80.81,
+    "precision": 80.77,
+    "recall": 80.81,
+    "f1_score": 80.38,
+    "confusion_matrix": [
+      [
+        533,
+        0,
+        123
+      ],
+      [
+        0,
+        57,
+        74
+      ],
+      [
+        87,
+        23,
+        703
+      ]
+    ],
+    "cv_mean": 80.52,
+    "cv_std": 0.93
+  },
+  "SVM": {
+    "accuracy": 79.88,
+    "precision": 80.06,
+    "recall": 79.88,
+    "f1_score": 78.82,
+    "confusion_matrix": [
+      [
+        528,
+        0,
+        128
+      ],
+      [
+        0,
+        36,
+        95
+      ],
+      [
+        87,
+        12,
+        714
+      ]
+    ],
+    "cv_mean": 79.73,
+    "cv_std": 0.87
+  },
+  "Decision Tree": {
+    "accuracy": 72.94,
+    "precision": 72.61,
+    "recall": 72.94,
+    "f1_score": 72.39,
+    "confusion_matrix": [
+      [
+        477,
+        1,
+        178
+      ],
+      [
+        0,
+        42,
+        89
+      ],
+      [
+        128,
+        37,
+        648
+      ]
+    ],
+    "cv_mean": 70.06,
+    "cv_std": 2.31
+  },
+  "K-Nearest Neighbors": {
+    "accuracy": 69.81,
+    "precision": 70.56,
+    "recall": 69.81,
+    "f1_score": 68.64,
+    "confusion_matrix": [
+      [
+        403,
+        0,
+        253
+      ],
+      [
+        0,
+        31,
+        100
+      ],
+      [
+        105,
+        25,
+        683
+      ]
+    ],
+    "cv_mean": 70.36,
+    "cv_std": 1.82
+  },
+  "Naive Bayes": {
+    "accuracy": 71.31,
+    "precision": 72.97,
+    "recall": 71.31,
+    "f1_score": 71.79,
+    "confusion_matrix": [
+      [
+        467,
+        1,
+        188
+      ],
+      [
+        0,
+        94,
+        37
+      ],
+      [
+        119,
+        114,
+        580
+      ]
+    ],
+    "cv_mean": 70.75,
+    "cv_std": 1.36
+  },
+  "feature_importance": {
+    "visibility": 1.1039934548284134,
+    "speed": 1.0094419841217754,
+    "alcohol_involved": 0.9672812377516404,
+    "vehicles_involved": 0.940928022406896,
+    "pedestrians_involved": 0.740913818023877,
+    "is_peak_hour": 0.6046508672225644,
+    "traffic_density": 0.5925787723123922,
+    "driver_distracted": 0.5781756237238097,
+    "road_condition": 0.39696587101543773,
+    "speed_limit": 0.2288788156403179,
+    "road_type": 0.2035442066445379,
+    "weather": 0.07854367939062634,
+    "vehicle_age": 0.032487853788654875,
+    "humidity": 0.03070418365503932,
+    "road_width": 0.020362339311382583,
+    "temperature": 0.017875680466600225,
+    "day_of_week": 0.015774930522634536,
+    "vehicle_type": 0.014607424421548054,
+    "hour": 0.010717969072040034,
+    "junction_type": 0.009291381365479292,
+    "is_weekend": 0.007371296250708377,
+    "month": 0.0026604176229252014
+  },
+  "cross_val_scores": {
+    "Random Forest": {
+      "mean": 76.77,
+      "std": 1.84
+    },
+    "XGBoost": {
+      "mean": 78.7,
+      "std": 1.01
+    },
+    "Logistic Regression": {
+      "mean": 80.52,
+      "std": 0.93
+    },
+    "SVM": {
+      "mean": 79.73,
+      "std": 0.87
+    },
+    "Decision Tree": {
+      "mean": 70.06,
+      "std": 2.31
+    },
+    "K-Nearest Neighbors": {
+      "mean": 70.36,
+      "std": 1.82
+    },
+    "Naive Bayes": {
+      "mean": 70.75,
+      "std": 1.36
+    }
+  },
+  "best_model": "Logistic Regression",
+  "classes": [
+    "High",
+    "Low",
+    "Medium"
+  ],
+  "feature_cols": [
+    "hour",
+    "day_of_week",
+    "is_peak_hour",
+    "road_type",
+    "weather",
+    "traffic_density",
+    "speed",
+    "vehicle_type",
+    "vehicles_involved",
+    "road_condition",
+    "alcohol_involved",
+    "visibility",
+    "junction_type",
+    "month",
+    "is_weekend",
+    "vehicle_age",
+    "speed_limit",
+    "driver_distracted",
+    "pedestrians_involved",
+    "temperature",
+    "humidity",
+    "road_width"
+  ]
+}

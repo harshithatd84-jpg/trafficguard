@@ -1,0 +1,79 @@
+{
+  "users": {},
+  "predictions": [
+    {
+      "id": "2e653e61",
+      "timestamp": "2026-08-24 19:16:52.196517",
+      "severity": "High",
+      "probability": {
+        "High": 66.4,
+        "Low": 0.0,
+        "Medium": 33.6
+      },
+      "advice": "\ud83d\udea8 High risk! Avoid this route if possible. Emergency services alerted.",
+      "model_used": "Logistic Regression",
+      "user": "anonymous",
+      "input": {
+        "hour": 8,
+        "is_peak_hour": 1,
+        "month": 8,
+        "is_weekend": 0,
+        "day_of_week": "Monday",
+        "road_type": "Highway",
+        "weather": "Rainy",
+        "vehicle_type": "Car",
+        "road_condition": "Wet",
+        "junction_type": "Intersection",
+        "traffic_density": 5,
+        "speed": 50,
+        "visibility": 7,
+        "vehicles_involved": 2,
+        "temperature": 28,
+        "humidity": 65,
+        "alcohol_involved": 0,
+        "driver_distracted": 0,
+        "pedestrians_involved": 0,
+        "vehicle_age": 5,
+        "speed_limit": 80,
+        "road_width": 8
+      }
+    },
+    {
+      "id": "c6b2e6ba",
+      "timestamp": "2026-08-24 19:17:32.371984",
+      "severity": "High",
+      "probability": {
+        "High": 66.4,
+        "Low": 0.0,
+        "Medium": 33.6
+      },
+      "advice": "\ud83d\udea8 High risk! Avoid this route if possible. Emergency services alerted.",
+      "model_used": "Logistic Regression",
+      "user": "anonymous",
+      "input": {
+        "hour": 8,
+        "is_peak_hour": 1,
+        "month": 8,
+        "is_weekend": 0,
+        "day_of_week": "Monday",
+        "road_type": "Highway",
+        "weather": "Rainy",
+        "vehicle_type": "Car",
+        "road_condition": "Wet",
+        "junction_type": "Intersection",
+        "traffic_density": 5,
+        "speed": 50,
+        "visibility": 7,
+        "vehicles_involved": 2,
+        "temperature": 28,
+        "humidity": 65,
+        "alcohol_involved": 0,
+        "driver_distracted": 0,
+        "pedestrians_involved": 0,
+        "vehicle_age": 5,
+        "speed_limit": 80,
+        "road_width": 8
+      }
+    }
+  ]
+}

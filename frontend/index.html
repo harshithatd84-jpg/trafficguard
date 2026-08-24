@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TrafficGuard AI</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<!-- ═══════ LOADER ════════════════════════════════════ -->
+<div id="loader">
+  <div class="loader-logo">Traffic<span>Guard</span> AI</div>
+  <div class="loader-spinner">
+    <div class="spinner-ring sr1"></div>
+    <div class="spinner-ring sr2"></div>
+    <div class="spinner-ring sr3"></div>
+  </div>
+  <div class="loader-progress">
+    <div class="loader-pct" id="loaderPct">0%</div>
+    <div class="loader-bar-bg"><div class="loader-bar-fill" id="loaderFill"></div></div>
+    <div class="loader-msg" id="loaderMsg">Initializing…</div>
+  </div>
+</div>
+
+<!-- ═══════ AUTH MODAL ════════════════════════════════ -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" data-i18n="sign_in">Sign In</span>
+      <button class="modal-close" onclick="closeAuth()">✕</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="tabLogin" onclick="switchAuthTab('login')" data-i18n="login">Login</button>
+      <button class="modal-tab" id="tabRegister" onclick="switchAuthTab('register')" data-i18n="register">Register</button>
+    </div>
+
+    <!-- Login form -->
+    <div id="loginForm">
+      <div class="field mb16">
+        <label class="field-label" data-i18n="email">Email</label>
+        <input class="input" type="email" id="loginEmail" placeholder="you@example.com"/>
+      </div>
+      <div class="field mb16">
+        <label class="field-label" data-i18n="password">Password</label>
+        <input class="input" type="password" id="loginPwd" placeholder="••••••••"/>
+      </div>
+      <div class="form-error" id="loginErr"></div>
+      <button class="btn btn-primary btn-lg mt8" onclick="doLogin()">
+        <span>🔑</span> <span data-i18n="login">Login</span>
+      </button>
+      <p class="text-sm text2 mt8" style="text-align:center">
+        <span data-i18n="demo_hint">Demo: test@example.com / password123</span>
+      </p>
+    </div>
+
+    <!-- Register form -->
+    <div id="registerForm" style="display:none">
+      <div class="field mb16">
+        <label class="field-label" data-i18n="name">Full Name</label>
+        <input class="input" type="text" id="regName" placeholder="Your name"/>
+      </div>
+      <div class="field mb16">
+        <label class="field-label" data-i18n="email">Email</label>
+        <input class="input" type="email" id="regEmail" placeholder="you@example.com"/>
+      </div>
+      <div class="field mb16">
+        <label class="field-label" data-i18n="password">Password</label>
+        <input class="input" type="password" id="regPwd" placeholder="Min 6 chars"/>
+      </div>
+      <div class="form-error" id="regErr"></div>
+      <div class="form-success" id="regOk"></div>
+      <button class="btn btn-primary btn-lg mt8" onclick="doRegister()">
+        <span>✨</span> <span data-i18n="create_account">Create Account</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ SIDEBAR ════════════════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🚦</div>
+    <div class="logo-text">Traffic<span>Guard</span></div>
+  </div>
+  <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">◀</button>
+
+  <ul class="sidebar-nav">
+    <li class="nav-item">
+      <a class="nav-link active" href="javascript:void(0)" onclick="showPage('predict',this)">
+        <span class="nav-icon">⚡</span>
+        <span class="nav-label" data-i18n="nav_predict">Predict</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="javascript:void(0)" onclick="showPage('dashboard',this)">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label" data-i18n="nav_dashboard">Dashboard</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="javascript:void(0)" onclick="showPage('map',this)">
+        <span class="nav-icon">🗺️</span>
+        <span class="nav-label" data-i18n="nav_map">Hotspot Map</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="javascript:void(0)" onclick="showPage('models',this)">
+        <span class="nav-icon">🤖</span>
+        <span class="nav-label" data-i18n="nav_models">ML Models</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="javascript:void(0)" onclick="showPage('history',this)">
+        <span class="nav-icon">📋</span>
+        <span class="nav-label" data-i18n="nav_history">History</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="javascript:void(0)" onclick="showPage('upload',this)">
+        <span class="nav-icon">📤</span>
+        <span class="nav-label" data-i18n="nav_upload">Upload Data</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="javascript:void(0)" onclick="showPage('settings',this)">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-label" data-i18n="nav_settings">Settings</span>
+      </a>
+    </li>
+  </ul>
+
+  <div class="sidebar-bottom">
+    <a class="nav-link" href="#" id="authNavBtn" onclick="handleAuthNav()">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label" id="authNavLabel" data-i18n="login">Login</span>
+    </a>
+  </div>
+</aside>
+
+<!-- ═══════ TOPBAR ═════════════════════════════════════ -->
+<header class="topbar" id="topbar">
+  <button class="mobile-menu-btn" onclick="toggleMobile()">☰</button>
+  <div class="topbar-title" id="topbarTitle">
+    Predict <span data-i18n="topbar_sub">— Severity Analysis</span>
+  </div>
+  <div class="topbar-actions">
+    <select class="lang-select" id="langSelect" onchange="setLanguage(this.value)">
+      <option value="en">🇬🇧 English</option>
+      <option value="hi">🇮🇳 हिंदी</option>
+      <option value="kn">🇮🇳 ಕನ್ನಡ</option>
+      <option value="ta">🇮🇳 தமிழ்</option>
+      <option value="te">🇮🇳 తెలుగు</option>
+      <option value="fr">🇫🇷 Français</option>
+      <option value="de">🇩🇪 Deutsch</option>
+      <option value="es">🇪🇸 Español</option>
+    </select>
+    <button class="icon-btn" title="Toggle dark/light" onclick="toggleTheme()">🌙</button>
+    <div class="api-badge offline" id="apiBadge">
+      <div class="api-dot"></div>
+      <span id="apiText">OFFLINE</span>
+    </div>
+    <div class="user-pill" id="userPill" onclick="handleAuthNav()" style="display:none">
+      <div class="user-avatar" id="userAvatar">?</div>
+      <span class="user-name" id="userNameDisplay">User</span>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════ MAIN ════════════════════════════════════════ -->
+<main class="main">
+
+  <!-- ── PREDICT ─────────────────────────────────────── -->
+  <div class="page active" id="page-predict">
+    <div class="page-header">
+      <h1 class="page-title" data-i18n="predict_title">🚦 Accident Severity Predictor</h1>
+      <p class="page-sub" data-i18n="predict_sub">Configure road conditions and run AI-powered severity analysis</p>
+    </div>
+
+    <div class="predict-layout">
+      <!-- INPUT FORM -->
+      <div class="card">
+        <div class="form-section-title" data-i18n="time_conditions">Time & Conditions</div>
+        <div class="form-grid">
+          <div class="field span2">
+            <div class="field-label">
+              <span data-i18n="hour_of_day">Hour of Day</span>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span class="peak-tag" id="peakTag">⚡ Peak Hour</span>
+                <span class="field-value" id="hourDisplay">08:00</span>
+              </div>
+            </div>
+            <input type="range" id="hour" min="0" max="23" value="8" oninput="onHourChange(this.value)"/>
+            <div class="flex-center" style="justify-content:space-between;margin-top:4px">
+              <span style="font-size:10px;color:var(--text3);font-family:var(--mono)">00:00</span>
+              <span style="font-size:10px;color:var(--text3);font-family:var(--mono)">12:00</span>
+              <span style="font-size:10px;color:var(--text3);font-family:var(--mono)">23:00</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label" data-i18n="day_of_week">Day of Week</label>
+            <div class="select-wrap">
+              <select class="select-el" id="day_of_week"></select>
+              <span class="select-arrow">▾</span>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label" data-i18n="weather">Weather</label>
+            <div class="select-wrap">
+              <select class="select-el" id="weather"></select>
+              <span class="select-arrow">▾</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section-title" data-i18n="road_info">Road Information</div>
+        <div class="form-grid">
+          <div class="field">
+            <label class="field-label" data-i18n="road_type">Road Type</label>
+            <div class="select-wrap">
+              <select class="select-el" id="road_type"></select>
+              <span class="select-arrow">▾</span>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label" data-i18n="road_condition">Road Condition</label>
+            <div class="select-wrap">
+              <select class="select-el" id="road_condition"></select>
+              <span class="select-arrow">▾</span>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label" data-i18n="junction_type">Junction Type</label>
+            <div class="select-wrap">
+              <select class="select-el" id="junction_type"></select>
+              <span class="select-arrow">▾</span>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label" data-i18n="vehicle_type">Vehicle Type</label>
+            <div class="select-wrap">
+              <select class="select-el" id="vehicle_type"></select>
+              <span class="select-arrow">▾</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section-title" data-i18n="traffic_params">Traffic Parameters</div>
+        <div class="form-grid three">
+          <div class="field">
+            <div class="field-label">
+              <span data-i18n="traffic_density">Traffic Density</span>
+              <span class="field-value" id="tdVal">5</span>
+            </div>
+            <input type="range" id="traffic_density" min="1" max="10" value="5"
+                   oninput="document.getElementById('tdVal').textContent=this.value"/>
+          </div>
+          <div class="field">
+            <div class="field-label">
+              <span data-i18n="speed">Speed (km/h)</span>
+              <span class="field-value" id="spVal">50</span>
+            </div>
+            <input type="range" id="speed" min="10" max="120" value="50"
+                   oninput="document.getElementById('spVal').textContent=this.value"/>
+          </div>
+          <div class="field">
+            <div class="field-label">
+              <span data-i18n="visibility">Visibility</span>
+              <span class="field-value" id="visVal">7</span>
+            </div>
+            <input type="range" id="visibility" min="1" max="10" value="7"
+                   oninput="document.getElementById('visVal').textContent=this.value"/>
+          </div>
+          <div class="field">
+            <div class="field-label">
+              <span data-i18n="vehicles_involved">Vehicles Involved</span>
+              <span class="field-value" id="viVal">2</span>
+            </div>
+            <input type="range" id="vehicles_involved" min="1" max="5" value="2"
+                   oninput="document.getElementById('viVal').textContent=this.value"/>
+          </div>
+          <div class="field">
+            <div class="field-label">
+              <span data-i18n="temperature">Temp (°C)</span>
+              <span class="field-value" id="tempVal">28</span>
+            </div>
+            <input type="range" id="temperature" min="10" max="45" value="28"
+                   oninput="document.getElementById('tempVal').textContent=this.value"/>
+          </div>
+          <div class="field">
+            <div class="field-label">
+              <span data-i18n="humidity">Humidity %</span>
+              <span class="field-value" id="humVal">65</span>
+            </div>
+            <input type="range" id="humidity" min="20" max="100" value="65"
+                   oninput="document.getElementById('humVal').textContent=this.value"/>
+          </div>
+        </div>
+
+        <div class="form-section-title" data-i18n="human_factors">Human Factors</div>
+        <div class="form-grid">
+          <div class="field">
+            <div class="field-label" data-i18n="alcohol_involved">Alcohol Involved</div>
+            <div class="toggle-wrap mt8">
+              <div class="toggle-switch" id="alcSwitch" onclick="toggle('alcSwitch','alcVal')"></div>
+              <span class="toggle-lbl" id="alcVal">No</span>
+            </div>
+          </div>
+          <div class="field">
+            <div class="field-label" data-i18n="driver_distracted">Driver Distracted</div>
+            <div class="toggle-wrap mt8">
+              <div class="toggle-switch" id="distSwitch" onclick="toggle('distSwitch','distVal')"></div>
+              <span class="toggle-lbl" id="distVal">No</span>
+            </div>
+          </div>
+          <div class="field">
+            <div class="field-label">
+              <span data-i18n="pedestrians">Pedestrians</span>
+              <span class="field-value" id="pedVal">0</span>
+            </div>
+            <input type="range" id="pedestrians_involved" min="0" max="3" value="0"
+                   oninput="document.getElementById('pedVal').textContent=this.value"/>
+          </div>
+          <div class="field">
+            <div class="field-label">
+              <span data-i18n="vehicle_age">Vehicle Age (yrs)</span>
+              <span class="field-value" id="ageVal">5</span>
+            </div>
+            <input type="range" id="vehicle_age" min="0" max="25" value="5"
+                   oninput="document.getElementById('ageVal').textContent=this.value"/>
+          </div>
+        </div>
+
+        <div class="flex-center" style="gap:12px;margin-top:8px;flex-wrap:wrap">
+          <button class="btn btn-primary btn-lg" style="flex:1;min-width:200px" onclick="predict()" id="predictBtn">
+            <span>⚡</span> <span data-i18n="run_prediction">Run Prediction</span>
+          </button>
+          <button class="btn btn-ghost" onclick="resetForm()" title="Reset">↺ Reset</button>
+        </div>
+      </div>
+
+      <!-- RESULT PANEL -->
+      <div id="resultPanel">
+        <div class="card" id="resultIdle">
+          <div class="result-idle">
+            <div class="idle-rings">
+              <div class="idle-ring"></div>
+              <div class="idle-ring"></div>
+              <div class="idle-ring"></div>
+              <div class="idle-ring-icon">🎯</div>
+            </div>
+            <div class="idle-title" data-i18n="awaiting_input">Awaiting Input</div>
+            <div class="idle-sub" data-i18n="idle_hint">Configure the conditions on<br>the left and click Run Prediction</div>
+          </div>
+        </div>
+
+        <div class="card" id="resultOutput" style="display:none">
+          <!-- Severity Badge -->
+          <div class="sev-badge" id="sevBadge">
+            <span class="sev-emoji" id="sevEmoji">🔴</span>
+            <div class="sev-label" data-i18n="severity_level">SEVERITY LEVEL</div>
+            <div class="sev-value" id="sevValue">—</div>
+          </div>
+
+          <!-- Advice -->
+          <div class="advice-card" id="adviceCard"></div>
+
+          <!-- Probabilities -->
+          <div class="prob-block">
+            <div class="prob-title" data-i18n="probability_dist">Probability Distribution</div>
+            <div id="probBars"></div>
+          </div>
+
+          <!-- Model consensus -->
+          <div class="card card-sm mb16" id="consensusBlock" style="display:none">
+            <div class="card-title mb16"><span class="icon">🤖</span> <span data-i18n="model_consensus">Model Consensus</span></div>
+            <div id="consensusRows"></div>
+          </div>
+
+          <!-- Export buttons -->
+          <div class="btn-group">
+            <button class="btn btn-ghost btn-sm" onclick="exportPDF()">
+              📄 <span data-i18n="export_pdf">PDF Report</span>
+            </button>
+            <button class="btn btn-ghost btn-sm" onclick="exportSingleExcel()">
+              📊 <span data-i18n="export_excel">Excel</span>
+            </button>
+            <button class="btn btn-ghost btn-sm" onclick="printReport()">
+              🖨 <span data-i18n="print">Print</span>
+            </button>
+          </div>
+
+          <div class="model-tag mt8" id="modelTag"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DASHBOARD ──────────────────────────────────── -->
+  <div class="page" id="page-dashboard">
+    <div class="page-header">
+      <h1 class="page-title" data-i18n="dashboard_title">📊 Analytics Dashboard</h1>
+      <p class="page-sub" data-i18n="dashboard_sub">Dataset insights and accident pattern analysis</p>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-row" id="statsRow">
+      <div class="stat-card">
+        <span class="stat-icon">📁</span>
+        <div class="stat-val" id="statRecords">—</div>
+        <div class="stat-lbl" data-i18n="total_records">Total Records</div>
+      </div>
+      <div class="stat-card teal">
+        <span class="stat-icon">⚡</span>
+        <div class="stat-val" id="statPeak">—</div>
+        <div class="stat-lbl" data-i18n="peak_hour_incidents">Peak Hour Incidents</div>
+      </div>
+      <div class="stat-card coral">
+        <span class="stat-icon">🚨</span>
+        <div class="stat-val" id="statHigh">—</div>
+        <div class="stat-lbl" data-i18n="high_severity">High Severity</div>
+      </div>
+      <div class="stat-card amber">
+        <span class="stat-icon">💨</span>
+        <div class="stat-val" id="statSpeed">—</div>
+        <div class="stat-lbl" data-i18n="avg_speed">Avg Speed km/h</div>
+      </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="charts-grid-2 mb16" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">🍩</span> <span data-i18n="severity_dist">Severity Distribution</span></div>
+        </div>
+        <canvas id="chartSeverity" height="200"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">🕐</span> <span data-i18n="accidents_by_hour">Accidents by Hour</span></div>
+        </div>
+        <canvas id="chartHourly" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="charts-grid-2" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">🌧</span> <span data-i18n="weather_impact">Weather Impact</span></div>
+        </div>
+        <canvas id="chartWeather" height="200"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">🛣</span> <span data-i18n="road_type_breakdown">Road Type Breakdown</span></div>
+        </div>
+        <canvas id="chartRoad" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- Charts Row 3 -->
+    <div class="charts-grid-2" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">📅</span> <span data-i18n="day_of_week_chart">Day of Week</span></div>
+        </div>
+        <canvas id="chartDay" height="200"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">🍺</span> <span data-i18n="alcohol_chart">Alcohol vs Severity</span></div>
+        </div>
+        <canvas id="chartAlcohol" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- Feature Importance full width -->
+    <div class="card" id="fiCard" style="display:none;margin-bottom:20px">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">🏆</span> <span data-i18n="feature_importance">Feature Importance</span></div>
+      </div>
+      <canvas id="chartFI" height="120"></canvas>
+    </div>
+  </div>
+
+  <!-- ── MAP ────────────────────────────────────────── -->
+  <div class="page" id="page-map">
+    <div class="page-header">
+      <h1 class="page-title" data-i18n="map_title">🗺️ Accident Hotspot Map</h1>
+      <p class="page-sub" data-i18n="map_sub">Bangalore accident hotspots — simulated based on dataset patterns</p>
+    </div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="mini-map" id="hotspotMap">
+        <div class="map-grid"></div>
+        <div class="map-title">BANGALORE — ACCIDENT HOTSPOTS</div>
+        <div id="hotspotDots"></div>
+        <div class="map-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--coral)"></div> High Severity</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div> Medium Severity</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--emerald)"></div> Low Severity</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">📍</span> <span data-i18n="hotspot_table">Hotspot Details</span></div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="hotspotTable">
+          <thead>
+            <tr>
+              <th data-i18n="location">Location</th>
+              <th data-i18n="incidents">Incidents</th>
+              <th data-i18n="severity">Severity</th>
+              <th data-i18n="coordinates">Coordinates</th>
+            </tr>
+          </thead>
+          <tbody id="hotspotTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MODELS ─────────────────────────────────────── -->
+  <div class="page" id="page-models">
+    <div class="page-header">
+      <h1 class="page-title" data-i18n="models_title">🤖 ML Model Performance</h1>
+      <p class="page-sub" data-i18n="models_sub">Comprehensive comparison of all trained models</p>
+    </div>
+
+    <!-- Accuracy bars -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">🎯</span> <span data-i18n="accuracy_comparison">Accuracy Comparison</span></div>
+      </div>
+      <div id="accuracyBars"></div>
+    </div>
+
+    <!-- Full metrics table -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">📋</span> <span data-i18n="full_metrics">Full Metrics Table</span></div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="metricsTable">
+          <thead>
+            <tr>
+              <th data-i18n="model">Model</th>
+              <th data-i18n="accuracy">Accuracy</th>
+              <th data-i18n="precision">Precision</th>
+              <th data-i18n="recall">Recall</th>
+              <th data-i18n="f1">F1-Score</th>
+              <th>CV Mean</th>
+              <th>CV Std</th>
+              <th data-i18n="status">Status</th>
+            </tr>
+          </thead>
+          <tbody id="metricsTableBody"><tr><td colspan="8" class="empty-state">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CV scores + Confusion Matrix -->
+    <div class="charts-grid-2" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">🔄</span> <span data-i18n="cross_val">Cross-Validation Scores</span></div>
+        </div>
+        <div id="cvScores"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">🟦</span> <span data-i18n="confusion_matrix">Confusion Matrix (Best Model)</span></div>
+        </div>
+        <div id="confusionMatrix" style="display:flex;justify-content:center;padding:16px"></div>
+      </div>
+    </div>
+
+    <!-- Model comparison radar -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">📡</span> <span data-i18n="radar_chart">Model Radar Comparison</span></div>
+      </div>
+      <canvas id="chartRadar" height="100"></canvas>
+    </div>
+  </div>
+
+  <!-- ── HISTORY ─────────────────────────────────────── -->
+  <div class="page" id="page-history">
+    <div class="page-header flex-center between">
+      <div>
+        <h1 class="page-title" data-i18n="history_title">📋 Prediction History</h1>
+        <p class="page-sub" data-i18n="history_sub">Your past severity predictions</p>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-outline btn-sm" onclick="exportHistoryCSV()">
+          📥 <span data-i18n="export_csv">Export CSV</span>
+        </button>
+        <button class="btn btn-outline btn-sm" onclick="exportHistoryExcel()">
+          📊 <span data-i18n="export_xlsx">Export XLSX</span>
+        </button>
+        <button class="btn btn-outline btn-sm" onclick="exportHistoryJSON()">
+          📄 <span data-i18n="export_json">Export JSON</span>
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="clearHistory()">
+          🗑 <span data-i18n="clear_all">Clear All</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mini stats -->
+    <div class="stats-row" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+      <div class="stat-card">
+        <span class="stat-icon">📊</span>
+        <div class="stat-val" id="histTotal">0</div>
+        <div class="stat-lbl" data-i18n="total_predictions">Total Predictions</div>
+      </div>
+      <div class="stat-card coral">
+        <span class="stat-icon">🚨</span>
+        <div class="stat-val" id="histHigh">0</div>
+        <div class="stat-lbl" data-i18n="high_severity_count">High Severity</div>
+      </div>
+      <div class="stat-card teal">
+        <span class="stat-icon">✅</span>
+        <div class="stat-val" id="histLow">0</div>
+        <div class="stat-lbl" data-i18n="low_severity_count">Low Severity</div>
+      </div>
+    </div>
+
+    <!-- History chart -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">📈</span> <span data-i18n="history_trend">Prediction Trend</span></div>
+      </div>
+      <canvas id="chartHistoryTrend" height="120"></canvas>
+    </div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th data-i18n="timestamp">Timestamp</th>
+              <th data-i18n="severity">Severity</th>
+              <th data-i18n="weather">Weather</th>
+              <th data-i18n="road_type">Road Type</th>
+              <th data-i18n="hour">Hour</th>
+              <th data-i18n="speed">Speed</th>
+              <th data-i18n="model">Model</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <tr><td colspan="9"><div class="empty-state"><span class="emo">📭</span><span data-i18n="no_history">No predictions yet</span></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── UPLOAD ──────────────────────────────────────── -->
+  <div class="page" id="page-upload">
+    <div class="page-header">
+      <h1 class="page-title" data-i18n="upload_title">📤 Upload Your Data</h1>
+      <p class="page-sub" data-i18n="upload_sub">Upload a CSV file to analyze your own accident dataset</p>
+    </div>
+
+    <div class="card" style="margin-bottom:20px">
+      <div class="drop-zone" id="dropZone" onclick="document.getElementById('csvInput').click()"
+           ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+        <span class="drop-icon">📂</span>
+        <div class="drop-title" data-i18n="drag_drop">Drag & Drop CSV File</div>
+        <div class="drop-sub" data-i18n="or_click">or click to browse — Max 10MB</div>
+      </div>
+      <input type="file" id="csvInput" accept=".csv" style="display:none" onchange="handleFileUpload(this.files[0])"/>
+
+      <div class="card" style="margin-bottom:16px;background:var(--bg3)">
+        <div class="card-title mb16"><span class="icon">📝</span> <span data-i18n="required_cols">Required / Recommended Columns</span></div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--text2);line-height:2">
+          <b style="color:var(--primary)">Required:</b> hour, weather, road_type, speed<br>
+          <b style="color:var(--teal)">Optional:</b> day_of_week, traffic_density, visibility, vehicles_involved, road_condition, alcohol_involved, junction_type, severity
+        </div>
+      </div>
+    </div>
+
+    <div class="upload-results" id="uploadResults">
+      <div class="stats-row" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px" id="uploadStats"></div>
+      <div class="card" style="margin-bottom:20px" id="uploadChartCard">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">📊</span> <span data-i18n="uploaded_analysis">Uploaded Data Analysis</span></div>
+        </div>
+        <canvas id="chartUpload" height="150"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">🔍</span> <span data-i18n="data_preview">Data Preview (first 5 rows)</span></div>
+        </div>
+        <div class="sample-table" id="sampleTable"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SETTINGS ────────────────────────────────────── -->
+  <div class="page" id="page-settings">
+    <div class="page-header">
+      <h1 class="page-title" data-i18n="settings_title">⚙️ Settings</h1>
+      <p class="page-sub" data-i18n="settings_sub">Customize your TrafficGuard AI experience</p>
+    </div>
+
+    <div class="card" style="max-width:640px">
+
+      <!-- Profile Section -->
+      <div class="settings-section">
+        <div class="settings-title">👤 <span data-i18n="profile">Profile</span></div>
+        <div id="profileSection">
+          <div class="field mb16">
+            <label class="field-label" data-i18n="name">Name</label>
+            <input class="input" id="settingsName" placeholder="Your name"/>
+          </div>
+          <div class="field mb16">
+            <label class="field-label" data-i18n="alert_email">Alert Email</label>
+            <input class="input" type="email" id="settingsEmail" placeholder="alerts@example.com"/>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="saveProfile()" data-i18n="save_changes">Save Changes</button>
+          <button class="btn btn-ghost btn-sm" onclick="logoutUser()" data-i18n="logout" id="logoutBtn" style="display:none">🚪 Logout</button>
+        </div>
+      </div>
+
+      <!-- Appearance -->
+      <div class="settings-section">
+        <div class="settings-title">🎨 <span data-i18n="appearance">Appearance</span></div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label" data-i18n="dark_mode">Dark Mode</div>
+            <div class="settings-row-desc" data-i18n="dark_mode_desc">Toggle between dark and light theme</div>
+          </div>
+          <div class="toggle-switch on" id="darkModeToggle" onclick="toggleTheme()"></div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label" data-i18n="language">Language</div>
+            <div class="settings-row-desc" data-i18n="language_desc">Select your preferred language</div>
+          </div>
+          <select class="select-el" style="width:140px" onchange="setLanguage(this.value)" id="settingsLang">
+            <option value="en">English</option>
+            <option value="hi">हिंदी</option>
+            <option value="kn">ಕನ್ನಡ</option>
+            <option value="ta">தமிழ்</option>
+            <option value="te">తెలుగు</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+            <option value="es">Español</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Alerts -->
+      <div class="settings-section">
+        <div class="settings-title">🔔 <span data-i18n="alerts">Alerts & Notifications</span></div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label" data-i18n="email_alerts">Email Alerts</div>
+            <div class="settings-row-desc" data-i18n="email_alerts_desc">Receive email when High severity is predicted</div>
+          </div>
+          <div class="toggle-switch on" id="alertsToggle" onclick="toggle('alertsToggle','alertsLbl')"></div>
+        </div>
+      </div>
+
+      <!-- Danger zone -->
+      <div class="settings-section">
+        <div class="settings-title" style="color:var(--coral)">⚠️ <span data-i18n="danger_zone">Danger Zone</span></div>
+        <button class="btn btn-danger" onclick="clearHistory()" data-i18n="clear_history">
+          🗑 Clear All Prediction History
+        </button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="js/i18n.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
